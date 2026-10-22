@@ -1,0 +1,17 @@
+
+# Fichiers sensibles
+.env
+.env.*
+!.env.example
+config.local.php
+
+# Dépendances et fichiers temporaires
+/vendor/
+/node_modules/
+/tmp/
+/cache/
+
+# Sauvegardes et journaux
+*.log
+*.bak
+*.tmp

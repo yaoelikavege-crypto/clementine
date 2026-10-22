@@ -1,0 +1,87 @@
+# =============================================================================
+#  Clémentine · 21 ans — configuration Apache (InfinityFree)
+# =============================================================================
+
+Options -Indexes
+DirectoryIndex index.php
+
+# --- Pages d'erreur ---------------------------------------------------------
+#
+#  On n'utilise PAS « ErrorDocument 404 /errors/404.php » : un chemin absolu
+#  ne fonctionne que si le site est installé à la racine du domaine. Dans un
+#  sous-dossier (/htdocs/clementine par exemple), Apache chercherait
+#  /errors/404.php à la racine et afficherait sa propre page.
+#
+#  Les règles ci-dessous utilisent des chemins RELATIFS au dossier qui
+#  contient ce fichier : elles fonctionnent donc à la racine comme dans
+#  n'importe quel sous-dossier.
+#
+#  Les dossiers privés (includes, storage, sql, tools, uploads) refusent
+#  l'accès par leur propre .htaccess : Apache renvoie alors sa page 403
+#  standard, volontairement neutre (aucune information sur le site).
+#  Les 403 « métier » (visiteur avant la révélation, espace admin) sont,
+#  eux, rendus par PHP avec la page errors/403.php.
+#
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ errors/404.php [L]
+</IfModule>
+
+# --- Fichiers sensibles -----------------------------------------------------
+<FilesMatch "^(\.env|\.gitignore|\.gitattributes|\.user\.ini|\.DS_Store|composer\.(json|lock))$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+<FilesMatch "\.(md|sql|log|lock|ini|sh|bak|swp)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
+# --- En-têtes de sécurité (complément du contrôleur PHP) --------------------
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Header always set X-Robots-Tag "noindex, nofollow, noarchive"
+</IfModule>
+
+# --- Compression (si le module est disponible) ------------------------------
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# --- Cache des ressources statiques (pas des médias privés) -----------------
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType image/svg+xml "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 30 days"
+</IfModule>
+
+# --- Forcer HTTPS après activation du certificat SSL ------------------------
+# Décommentez ces trois lignes uniquement lorsque le cadenas HTTPS fonctionne
+# sur votre sous-domaine InfinityFree. Sinon, le site deviendrait inaccessible.
+#
+# <IfModule mod_rewrite.c>
+#     RewriteEngine On
+#     RewriteCond %{HTTPS} off
+#     RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+# </IfModule>
+
+ServerSignature Off

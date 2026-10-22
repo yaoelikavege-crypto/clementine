@@ -1,0 +1,28 @@
+# Secrets — ne jamais versionner
+/includes/config.php
+
+# Installation locale
+/storage/installed.lock
+/storage/logs/*.log
+
+# Médias envoyés (à sauvegarder séparément, hors dépôt)
+/uploads/images/*
+/uploads/videos/*
+/uploads/audio/*
+/uploads/thumbnails/*
+!/uploads/**/.htaccess
+
+# Divers
+.DS_Store
+Thumbs.db
+*.zip
+includes/config.local.php
+includes/config.prod.php
+storage/installed.lock
+.env
+.env.*
+includes/config.local.php
+includes/config.prod.php
+storage/installed.lock
+.env
+.env
